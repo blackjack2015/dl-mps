@@ -1,10 +1,20 @@
 from __future__ import print_function
 from models import *
 import copy
+import torchvision.models as models
 
 SUPPORT_NETS = {
-        'resnet-50': ResNet50(),
-        'resnet-101': ResNet101()
+        'resnet18': models.__dict__['resnet18'](),
+        'resnet50': models.__dict__['resnet50'](),
+        'resnet101': models.__dict__['resnet101'](),
+        'densenet121': DenseNet121()
+        }
+
+INPUT_DIMS = {
+        'resnet18':    [3, 32, 32],
+        'resnet50':    [3, 224, 224],
+        'resnet101':   [3, 224, 224],
+        'densenet121': [3, 224, 224]
         }
 
 def build_net(net_name):

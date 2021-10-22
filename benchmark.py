@@ -8,28 +8,31 @@ import torch.backends.cudnn as cudnn
 import numpy as np
 import skimage
 import torch.cuda as trc
-from net_builder import SUPPORT_NETS, build_net, get_net_info, count_parameters 
+from net_builder import SUPPORT_NETS, INPUT_DIMS, build_net, get_net_info, count_parameters 
+from utils import logger, formatter
 import torch.nn.functional as F
 import torch.nn as nn
 import psutil
+import logging
 #from pytorch_memlab import MemReporter
 
 process = psutil.Process(os.getpid())
 cudnn.benchmark = True
+logRoot = 'logs/'
 
-def benchmark(model='resnet-101', batch_size=1, input_dim=[3, 32, 32]):
+def benchmark(model='resnet-101', batch_size=1, repes=100):
 
     net = build_net(model).cuda()
 
-    input_shape = input_dim
+    input_shape = INPUT_DIMS[model]
     input_shape.insert(0, batch_size)
     get_net_info(net, input_shape=input_shape)
-    print(input_shape)
     dummy_input = torch.randn(input_shape, dtype=torch.float).cuda()
 
     # INIT LOGGERS
     starter, ender = trc.Event(enable_timing=True), trc.Event(enable_timing=True)
-    repetitions = 30
+    repetitions = repes * 3
+    ep = repetitions // 3
     mbytes = 2**20
     timings=np.zeros((repetitions,1))
     net.eval()
@@ -49,16 +52,25 @@ def benchmark(model='resnet-101', batch_size=1, input_dim=[3, 32, 32]):
             trc.synchronize()
             curr_time = starter.elapsed_time(ender)
             timings[rep] = curr_time
-            print(rep, curr_time)
+            if rep % 50 == 0:
+                print(rep, curr_time)
     
-    mean_syn = np.sum(timings) / repetitions
+    mean_syn = np.sum(timings[ep:-ep]) / (repetitions-ep*2)
     std_syn = np.std(timings)
-    print(model, mean_syn)
+    logger.info('%s %f %f' % (model, mean_syn, std_syn))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--net', type=str, help='indicate the name of net', default='', choices=SUPPORT_NETS)
+    parser.add_argument('--net', type=str, help='indicate the name of net', default='resnet18', choices=SUPPORT_NETS)
     parser.add_argument('--batch-size', type=int, help='mini batch size', default=1)
+    parser.add_argument('--repetitions', type=int, help='iterations to run', default=100)
+    parser.add_argument('--mode', type=str, help='temporal or mps', default='temporal')
 
     opt = parser.parse_args()
-    benchmark(batch_size=8)
+    logfile = '%s/%s/%s-bs%d' % (logRoot, opt.mode, opt.net, opt.batch_size)
+    hdlr = logging.FileHandler(logfile)
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr) 
+    logger.info('Configurations: %s', opt)
+
+    benchmark(model=opt.net, batch_size=opt.batch_size, repes=opt.repetitions)
