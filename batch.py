@@ -25,6 +25,8 @@ def batch_run(opt):
     cmd.append(str(opt.repetitions))
     cmd.append('--mode')
     cmd.append(opt.mode)
+    cmd.append('--replicas')
+    cmd.append(str(opt.replicas))
     print(cmd)
 
     p = subprocess.Popen(cmd)

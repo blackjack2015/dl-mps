@@ -3,6 +3,7 @@
 nets=("resnet18" "resnet50")
 bses=(4 16)
 replicas=(1 2 4)
+repes=400
 
 nvidia-cuda-mps-control -d
 
@@ -15,7 +16,7 @@ do
 
             echo $net $bs mps $repli
             sleep 5
-            python batch.py --replicas $repli --net $net --batch-size $bs --repetitions 300 --mode mps
+            python batch.py --replicas $repli --net $net --batch-size $bs --repetitions $repes --mode mps
             
         done
     done

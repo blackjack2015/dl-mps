@@ -1,7 +1,7 @@
 #!/bin/bash
 
-nets=("resnet18" "resnet50")
-bses=(4, 16)
+nets=("resnet50")
+bses=(4)
 replicas=(1 2 4)
 
 for net in "${nets[@]}"

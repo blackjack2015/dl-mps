@@ -65,9 +65,10 @@ if __name__ == '__main__':
     parser.add_argument('--batch-size', type=int, help='mini batch size', default=1)
     parser.add_argument('--repetitions', type=int, help='iterations to run', default=100)
     parser.add_argument('--mode', type=str, help='temporal or mps', default='temporal')
+    parser.add_argument('--replicas', type=int, help='number of instances', default=1)
 
     opt = parser.parse_args()
-    logfile = '%s/%s/%s-bs%d' % (logRoot, opt.mode, opt.net, opt.batch_size)
+    logfile = '%s/%s/%s-bs%d-replicas%d' % (logRoot, opt.mode, opt.net, opt.batch_size, opt.replicas)
     hdlr = logging.FileHandler(logfile)
     hdlr.setFormatter(formatter)
     logger.addHandler(hdlr) 
