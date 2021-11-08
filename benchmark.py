@@ -26,7 +26,7 @@ def benchmark(model='resnet-101', batch_size=1, repes=100):
 
     input_shape = INPUT_DIMS[model]
     input_shape.insert(0, batch_size)
-    get_net_info(net, input_shape=input_shape)
+    #get_net_info(net, input_shape=input_shape)
     dummy_input = torch.randn(input_shape, dtype=torch.float).cuda()
 
     # INIT LOGGERS

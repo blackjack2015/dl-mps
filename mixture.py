@@ -33,18 +33,30 @@ def batch_run(opt):
     JobThread(p).start()
     return p
 
+def dict_to_args(jd, opt):
+
+    opt.net = jd['net']
+    opt.batch_size = jd['batch_size']
+    opt.repetitions = jd['repetitions']
+    opt.mode = jd['mode']
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--replicas', type=int, help='number of instances', default=1)
-    parser.add_argument('--net', type=str, help='indicate the name of net', default='resnet18', choices=SUPPORT_NETS)
-    parser.add_argument('--batch-size', type=int, help='mini batch size', default=1)
-    parser.add_argument('--repetitions', type=int, help='iterations to run', default=100)
-    parser.add_argument('--mode', type=str, help='temporal or mps', default='temporal')
-
     opt = parser.parse_args()
+    job1 = {'net': 'resnet50', 
+            'batch_size': 32, 
+            'repetitions': 400, 
+            'mode': 'temporal'}
 
-    for i in range(opt.replicas):
-        batch_run(opt)
+    job2 = {'net': 'resnet50', 
+            'batch_size': 8, 
+            'repetitions': 1600, 
+            'mode': 'temporal'}
+
+    dict_to_args(job1, opt)
+    batch_run(opt)
+    dict_to_args(job2, opt)
+    batch_run(opt)
 
         
